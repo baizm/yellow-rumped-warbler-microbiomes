@@ -1,0 +1,16 @@
+# How to use permutation to choose a significance threshold for Gemma. 
+# The gem.perm shell script runs one iteration, and the loop below will launch 100 iterations of that script
+
+#Transfer the relatedness matrix from the real gemma run
+#Also transfer the .fam input file
+
+#Produce two files necessary for permutation like this:
+#~~~in this example, fields1-5 are sample info, field20 is PCoA axis 2 phenotype
+cut -d ' ' -f 1-5 in_file_gemmaWGS.fam > nopheno
+cut -d ' ' -f 20 in_file_gemmaWGS.fam > pheno
+
+#Then run this loop to launch 100 gemma runs, each on a different permutation of phenotypes:
+for i in {1..100}; do sed "s/zzzzz/$i/g" test.txt > test.$i.txt; sbatch test.$i.txt; done
+
+# The script will store for each iteration the lowest p-value across all SNPs for that Gemma run
+# Equivalent of a Bonferroni correction would be to set the significance threshold for the real data at the 95th lowest value in the smallestpval.2.txt output file. 
